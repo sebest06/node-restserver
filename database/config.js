@@ -4,16 +4,13 @@ const dbConnection = async() => {
 
     try{
         mongoose.set("strictQuery", false);
-        /*await mongoose.connect( process.env.MONGODB, {
+        await mongoose.connect( process.env.MONGODB, {
             useNewUrlParser: true,
             //useUnifiedTopology: true,
             //useCreateIndex: true,
             //useFindAndModify: false
-        });*/
-        await mongoose.connect(process.env.MONGODB,() => {        
-            console.log('Bd online');
         });
-
+       
         console.log('base de datos on');
 
     }catch(err){
