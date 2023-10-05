@@ -3,11 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accesso denegado</title>
+    <title>Google Sign in</title>
 </head>
 <body>
 
-    <h1>Accesso denegado</h1>
+    <h1>Google Sign in</h1>
+    <hr>
+
+    <div id="g_id_onload"
+        data-client_id="942319446393-f0ho0rm4m0p57kmd81hii61dognohbhp.apps.googleusercontent.com"
+        data-auto_prompt="false"
+        data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+    </div>
+
+    <button id="google-signout">
+        Signout
+    </button>
     
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script>
+        function handleCredentialResponse(response) {
+           // decodeJwtResponse() is a custom function defined by you
+           // to decode the credential response.
+
+           //Google token
+           console.log("id token:", response.credential);
+
+           var data =  {id_token: response.credential};
+
+           var url = (window.location.hostname.includes('localhost') )
+                ? 'http://localhost:8080/api/auth/google'
+                : 'https://abcde.herokuapp.com/api/auth/google'
+ 
+        var myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+ 
+        var myInit = { method: 'POST',
+                    headers: myHeaders,
+                    mode: 'cors',
+                    cache: 'default',
+                    body: JSON.stringify(data) };
+
+                    var myRequest = new Request(url, myInit); 
+                    
+                    //console.log("aca?", JSON.stringify(data));
+    
+                    fetch( myRequest )
+                    .then(resp => resp.json())
+                    .then(resp => {
+                        localStorage.setItem( 'email', resp.usuario.correo)
+                        console.log("RESRPUESTA", resp);
+                    })
+                    .catch( err => console.log('ERROR ACA!',err) );
+        }
+
+        const button = document.getElementById('google-signout');
+        button.onclick = () => {
+            google.accounts.id.disableAutoSelect()
+            google.accounts.id.revoke(localStorage.getItem('email'), done => {
+                localStorage.clear();
+                location.reload();
+            } );
+        }
+      </script>
+
 </body>
 </html>
