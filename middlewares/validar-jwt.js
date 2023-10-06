@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const usuario = require('../models/usuario');
+const Usuario = require('../models/usuario');
 
 const validarJWT= async(req = request, res = response, next) => {
     const token = req.header('x-token');
@@ -11,7 +11,7 @@ const validarJWT= async(req = request, res = response, next) => {
     try{
         const { uid } = jwt.verify(token, process.env.SECRETORPUBLICKEY);
         
-        usuario = await usuario.findById(uid);
+        let usuario = await Usuario.findById(uid);
 
         if(!usuario) {
             return res.status(401).json({msg: 'usuario no existe'});
@@ -19,7 +19,7 @@ const validarJWT= async(req = request, res = response, next) => {
         if(!usuario.estado){
             return res.status(401).json({msg: 'no hay token'});
         }
-        
+
 
         req.uid = uid;
         req.usuario = usuario;
@@ -27,7 +27,7 @@ const validarJWT= async(req = request, res = response, next) => {
         
         next();
     } catch (err) {
-        console.log(error);
+        console.log(err);
         return res.status(401).json({msg: 'error token'});
     }
     
