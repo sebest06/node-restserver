@@ -11,7 +11,7 @@ const {
     validarArchivoSubir
 } = require("../middlewares");
 
-const { cargarArchivo,actualizarImagen, mostrarImagen } = require('../controllers/uploads');
+const { cargarArchivo,actualizarImagen, mostrarImagen,actualizarImagenCloudinary } = require('../controllers/uploads');
 
 
 const router = Router();
@@ -22,7 +22,7 @@ router.put('/:coleccion/:id', [
     check('id','mongo id').isMongoId(),
     check('coleccion').custom(c=> coleccionesPermitidas (c, ['usuario','productos'])),
     validarCampos
-], actualizarImagen);
+], actualizarImagenCloudinary);//actualizarImagen);
 
 router.get('/:coleccion/:id',[
     check('id','mongo id').isMongoId(),

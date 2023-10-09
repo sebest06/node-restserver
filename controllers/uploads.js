@@ -4,6 +4,11 @@ const { Usuario, Producto } = require("../models");
 const { model } = require("mongoose");
 const fs = require('fs');
 const path = require("path");
+const cloudinary = require('cloudinary').v2
+
+
+cloudinary.config(process.env.CLOUDINARY_URL);
+
 
 const cargarArchivo = async (req, res = response) => {
   
@@ -90,6 +95,55 @@ const actualizarImagen = async (req, res = response) => {
   }
 };
 
+const actualizarImagenCloudinary = async (req, res = response) => {
+  const { coleccion, id } = req.params;
+
+  let modelo;
+
+  switch (coleccion) {
+    case "usuarios":
+        modelo = await Usuario.findById(id);
+        if(!modelo) {
+            return res.status(400).json({msg: "usuario no exite"});
+        }
+      break;
+    case "productos":
+        modelo = await Producto.findById(id);
+        if(!modelo) {
+            return res.status(400).json({msg: "producto no exite"});
+        }
+      break;
+    default:
+      return res.status(500).json("error no implementado");
+  }
+
+  try {
+    
+    if ( modelo.img) {
+      const nombreArr = modelo.img.split('/');
+      const nombre = nombreArr[nombreArr.length - 1];
+      const [public_id] = nombre.split('.');
+
+      cloudinary.uploader.destroy(public_id);
+
+    }
+
+    const {secure_url} = await cloudinary.uploader.upload(req.files.archivo.tempFilePath);
+
+    modelo.img = secure_url;
+
+    await modelo.save();
+    
+    res.json({
+        modelo,
+    });
+  } catch (msg) {
+    res.status(400).json({
+      msg,
+    });
+  }
+};
+
 const mostrarImagen = async (req, res = response) => {
   const {id, coleccion} = req.params;
   let modelo;
@@ -134,5 +188,6 @@ const mostrarImagen = async (req, res = response) => {
 module.exports = {
   cargarArchivo,
   actualizarImagen,
-  mostrarImagen
+  mostrarImagen,
+  actualizarImagenCloudinary
 };
